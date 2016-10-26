@@ -10,10 +10,12 @@ git pull https://github.com/amosbastian/search_engine.git
 # Do this wherever your elasticsearch implementation is
 ./bin/elasticsearch
 
-# From the main folder, go to where all our Python files are
+# From the main folder, go to where all our Python files are and create XML and JSON folder
 cd app/views
+mkdir XML
+mkdir JSON
 
-# If you don't already have your JSON files locally
+# Add the XML files to the XML folder and create your JSON files
 python xml_to_json.py
 
 # Then you want to add the created JSON files to our Elasticsearch telegraaf index
