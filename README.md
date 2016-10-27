@@ -15,6 +15,9 @@ cd app/views
 mkdir XML
 mkdir JSON
 
+cd ../static
+mkdir images
+
 # Add the XML files to the XML folder and create your JSON files
 python xml_to_json.py
 
