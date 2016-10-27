@@ -1,3 +1,4 @@
 *.png
 *.xml
 *.json
+*.pyc
