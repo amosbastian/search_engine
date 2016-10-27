@@ -1,4 +1,4 @@
-import json, os, glob
+import json, os, glob, create_wordcloud
 from elasticsearch import Elasticsearch, helpers
 from bs4 import BeautifulSoup
 from xml.etree import ElementTree as ET
@@ -19,6 +19,7 @@ if __name__ == '__main__':
                     "id": element[2].attrib["{http://www.politicalmashup.nl}id"],
                     "source": element[2].attrib["{http://www.politicalmashup.nl}source"]
                 }
+                create_wordcloud.create_cloud(new_article["text"], "".join(new_article["id"].split(":")))
                 all_articles.append(new_article)
                 element.clear()
 

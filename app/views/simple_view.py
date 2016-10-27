@@ -1,6 +1,4 @@
 from flask import Blueprint, render_template, request
-from tt_eu import get_dates
-from tt_na import get_dates
 import simple_search
 
 blueprint = Blueprint("search_engine", __name__, url_prefix="/search_engine")
