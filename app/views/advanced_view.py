@@ -12,6 +12,13 @@ def home():
 
 @blueprint.route("/", methods=["POST"])
 def home_post():
-    query = request.form["query"]
+    qtitle = request.form["qtitle"]
+    qbody = request.form["qbody"]
+    underb = request.form["underb"]
+    upperb = request.form["upperb"]
+
+    query = (qtitle, qbody, underb, upperb)
     resp = advanced_search.advanced_search(query)
-    return render_template("search_engine/advanced_search.html", query=query, response=resp[0], barStats=resp[1])
+    return render_template("search_engine/advanced_search.html",
+                           query=query, response=resp[0], barStats=resp[1],
+                           msg=resp[2])

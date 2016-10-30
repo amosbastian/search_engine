@@ -1,17 +1,71 @@
 from elasticsearch import Elasticsearch
+import re
 import json
 import nltk.data
 
 
 def advanced_query(query):
+    qtitle, qbody, underb, upperb = query
+    print "\t <<< [", qtitle, "|", qbody, "] >>>"
+
+    matchqueryt = {"match": {"title": qtitle}}
+    matchqueryb = {"match": {"body": qbody}}
+    queries = [matchqueryt, matchqueryb]
+
+    querytype = {
+        "dis_max": {
+            "queries": queries,
+            "tie_breaker": 0.3
+        }
+    }
+
+    # Return all records if query strings are empty
+    if qtitle == "" and qbody == "":
+        queries = [{"match_all": {}}]
+    if qtitle == "" and qbody != "":
+        querytype = {
+            "term": {
+                "body": qbody
+            }
+        }
+
+    # error is a string to return to the template if there are any
+    # problems with the specified variable values
+    error = ""
+
+    # if underbound has not been specified, make underbound minimum value.
+    # make upperbound maximum value if not specified.
+    if underb == "":
+        underb = "0000-01-01"
+    if upperb == "":
+        upperb = "9999-12-31"
+
+    # Check if the dates have been set in the proper format
+    if not re.match('[\d-]+$', underb):
+        underb = "0000-01-01"
+        upperb = underb
+        error = "One of the date bounds not set properly!"
+    if not re.match('[\d-]+$', upperb):
+        upperb = "0000-01-01"
+        upperb = underb
+        error = "One of the date bounds not set properly!"
+
     dis_max = {
         "query": {
-            "dis_max": {
-                "queries": [
-                    {"match": {"title": query}},
-                    {"match": {"body": query}}
-                ],
-                "tie_breaker": 0.3
+            "filtered": {
+                "query": querytype,
+                "filter": {
+                    "bool": {
+                        "must": {
+                            "range": {
+                                "date": {
+                                    "gte": underb,
+                                    "lte": upperb
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-datehistogram-aggregation.html
@@ -25,7 +79,7 @@ def advanced_query(query):
             }
         }
     }
-    return dis_max
+    return dis_max, error
 
 
 def summarise(query, text):
@@ -51,15 +105,10 @@ def advanced_search(query):
 
     es.indices.refresh(index="telegraaf")
 
-    res = es.search(index="telegraaf", body=advanced_query(query))
+    body, error = advanced_query(query)
+    res = es.search(index="telegraaf", body=body)
     for hit in res["hits"]["hits"]:
-        hit["_source"]["text"] = summarise(query, hit["_source"]["text"])
-    # print "Total results: {}!".format(results["hits"]["total"])
-    # print "Showing top 5 results!\n"
-    # for hit in results["hits"]["hits"][:5]:
-    #     print "{} - {} - {}".format(hit["_score"], hit["_source"]["subject"], hit["_source"]["date"])
-    #     print hit["_source"]["source"]
-    #     print hit["_source"]["title"].encode("utf-8"), "\n"
+        hit["_source"]["text"] = summarise(query[1], hit["_source"]["text"])
 
     barStats = ""
     for dd in res["aggregations"]["ArticleDates"]["buckets"]:
@@ -67,7 +116,7 @@ def advanced_search(query):
         dc = dd['doc_count']
         barStats += yr + '-' + str(dc) + '/'
 
-    return res, barStats
+    return res, barStats, error
 
 if __name__ == '__main__':
     simple_search("oorlog in duitsland")

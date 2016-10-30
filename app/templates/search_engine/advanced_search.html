@@ -81,12 +81,18 @@ hgroup h2.lead { font: normal normal 1.125em "Roboto",Arial,Verdana,sans-serif; 
             </button>
         </a>
     </div>
-    <form action="." method="POST" class="form-inline">
-        <input type="text" class="form-control" placeholder="Search..." name="query">
-        <button type="submit" class="btn btn-default" name="my-form">
-            <span class="glyphicon glyphicon-search"></span>
-        </button>
-    </form>
+    <div>
+        <form action="." method="POST" class="form-inline">
+            <input type="text" class="form-control" placeholder="Search by Title" name="qtitle" style="width: 50%"><br>
+            <input type="text" class="form-control" placeholder="Search by Body" name="qbody" style="width: 50%"><br>
+            <input type="text" class="form-control" placeholder="Underbound yyyy-mm-dd" name="underb" style="width: 23%" >
+            <input type="text" class="form-control" placeholder="Upperbound yyyy-mm-dd" name="upperb" style="width: 23%">
+            <button type="submit" class="btn btn-default" name="my-form">
+                <span class="glyphicon glyphicon-search"></span>
+            </button>
+        </form>
+    </div>
+    <p> {{msg}}</p>
     </center>
 </div>
 {% if response is not none %}
