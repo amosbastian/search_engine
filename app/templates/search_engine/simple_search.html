@@ -19,12 +19,16 @@
             data.addColumn('string', 'Year');
             data.addColumn('number', 'Doc count');
 
-            var date_docc = [];
-            data.addRows([
-                ['1996', 5],
-                ['1997', 6],
-                ['1998', 4]
-            ]);
+            // convert string into list of lists
+            var dd_str = "{{barStats}}".split('/');
+            var dd = [];
+            var temp;
+            for (var i = 0; i < dd_str.length - 1; i++){
+                temp = dd_str[i].split('-');
+                temp[1] = parseInt(temp[1]);
+                dd.push(temp);
+            }
+            data.addRows(dd);
 
             // Instantiate and draw the chart.
             var chart = new google.visualization.ColumnChart(document.getElementById('datesHist'));

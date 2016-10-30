@@ -1,5 +1,5 @@
 from elasticsearch import Elasticsearch
-from create_histogram import create_hist
+import json
 import nltk.data
 
 
@@ -60,8 +60,14 @@ def simple_search(query):
     #     print "{} - {} - {}".format(hit["_score"], hit["_source"]["subject"], hit["_source"]["date"])
     #     print hit["_source"]["source"]
     #     print hit["_source"]["title"].encode("utf-8"), "\n"
-    create_hist(res)
-    return res
+
+    barStats = ""
+    for dd in res["aggregations"]["ArticleDates"]["buckets"]:
+        yr = dd['key_as_string'].split('-', 1)[0]
+        dc = dd['doc_count']
+        barStats += yr + '-' + str(dc) + '/'
+
+    return res, barStats
 
 if __name__ == '__main__':
     simple_search("oorlog in duitsland")

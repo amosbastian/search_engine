@@ -47,7 +47,7 @@ if __name__ == '__main__':
     es = Elasticsearch()
     es.indices.delete(index="telegraaf", ignore=[400, 404])
 
-    es.indices.create("telegraaf", body=index_body, request_timeout=300)
+    es.indices.create("telegraaf", body=index_body, request_timeout=600)
 
     for infile in glob.glob(os.path.join("JSON", "*.json")):
         print infile
