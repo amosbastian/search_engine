@@ -1,19 +1,32 @@
 from elasticsearch import Elasticsearch
+from create_histogram import create_hist
 import nltk.data
+
 
 def simple_query(query):
     dis_max = {
         "query": {
             "dis_max": {
                 "queries": [
-                    { "match": { "title": query }},
-                    { "match": { "body": query }}
+                    {"match": {"title": query}},
+                    {"match": {"body": query}}
                 ],
                 "tie_breaker": 0.3
+            }
+        },
+        # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-datehistogram-aggregation.html
+        "aggregations": {
+            "ArticleDates": {
+                "date_histogram": {
+                    "field": "date",
+                    "interval": "1y",
+                    "format": "yyyy-MM-dd"
+                }
             }
         }
     }
     return dis_max
+
 
 def summarise(query, text):
     tokenizer = nltk.data.load("nltk:tokenizers/punkt/dutch.pickle")
@@ -21,7 +34,8 @@ def summarise(query, text):
     for sentence in tokenizer.tokenize(text):
         if any([word in sentence for word in query.split()]):
             print sentence.encode("utf-8"), word
-            sentence = sentence.replace(word, "<b>{}</b>".format(word).encode("utf-8"))
+            sentence = sentence.replace(
+                word, "<b>{}</b>".format(word).encode("utf-8"))
             summarisation += sentence + " "
         if len(summarisation.split()) > 50:
             break
@@ -30,6 +44,7 @@ def summarise(query, text):
         return " ".join(text.strip().split()[:50])
     else:
         return summarisation.strip()
+
 
 def simple_search(query):
     es = Elasticsearch()
@@ -45,6 +60,7 @@ def simple_search(query):
     #     print "{} - {} - {}".format(hit["_score"], hit["_source"]["subject"], hit["_source"]["date"])
     #     print hit["_source"]["source"]
     #     print hit["_source"]["title"].encode("utf-8"), "\n"
+    create_hist(res)
     return res
 
 if __name__ == '__main__':

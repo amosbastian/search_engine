@@ -1,4 +1,6 @@
-import json, os, glob
+import json
+import os
+import glob
 from elasticsearch import Elasticsearch, helpers
 
 index_body = {
@@ -6,8 +8,8 @@ index_body = {
         "analysis": {
             "filter": {
                 "dutch_stop": {
-                "type": "stop",
-                "stopwords": "_dutch_" 
+                    "type": "stop",
+                    "stopwords": "_dutch_"
                 },
                 "dutch_stemmer": {
                     "type": "stemmer",
@@ -29,12 +31,13 @@ index_body = {
     "mappings": {
         "article": {
             "properties": {
-                "title":   { "type": "string", "analyzer": "dutch" },
-                "body":    { "type": "string", "analyzer": "dutch" },
-                "source":  { "type": "string"},
-                "subject": { "type": "string"},
-                "date":    { "type": "string"},
-                "id":      { "type": "string"}
+                "title":   {"type": "string", "analyzer": "dutch"},
+                "body":    {"type": "string", "analyzer": "dutch"},
+                "source":  {"type": "string"},
+                "subject": {"type": "string"},
+                "date":    {"type": "date",
+                            "format": "yyyy-MM-dd"},
+                "id":      {"type": "string"}
             }
         }
     }
@@ -43,7 +46,7 @@ index_body = {
 if __name__ == '__main__':
     es = Elasticsearch()
     es.indices.delete(index="telegraaf", ignore=[400, 404])
-    
+
     es.indices.create("telegraaf", body=index_body, request_timeout=300)
 
     for infile in glob.glob(os.path.join("JSON", "*.json")):
@@ -52,6 +55,6 @@ if __name__ == '__main__':
             all_articles = json.load(f)
 
         k = ({"_type": "article", "_index": "telegraaf", "_source": article}
-            for article in all_articles)
+             for article in all_articles)
 
         helpers.bulk(es, k)
