@@ -6,7 +6,6 @@ import nltk.data
 
 def advanced_query(query):
     qtitle, qbody, underb, upperb = query
-    print "\t <<< [", qtitle, "|", qbody, "] >>>"
 
     matchqueryt = {"match": {"title": qtitle}}
     matchqueryb = {"match": {"body": qbody}}

@@ -12,9 +12,13 @@ def home():
 
 @blueprint.route("/", methods=["POST"])
 def home_post():
-    query = request.form["query"]
+    qstring = request.form["query"]
     art = request.form.get("art")
     adv = request.form.get("adv")
     fam = request.form.get("fam")
-    resp = faceted_search.faceted_search(query, (art, adv, fam))
-    return render_template("search_engine/faceted_search.html", query=query, response=resp[0], barStats=resp[1])
+    ill = request.form.get("ill")
+
+    query = (qstring, art, adv, fam, ill)
+    resp = faceted_search.faceted_search(query)
+    return render_template("search_engine/faceted_search.html",
+                           query=query, response=resp[0], barStats=resp[1])

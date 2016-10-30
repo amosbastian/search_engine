@@ -3,17 +3,46 @@ import json
 import nltk.data
 
 
-def faceted_query(query, facets):
-    art, adv, fam = facets
+# Returns a JSON object snippet that matches term with the given facet.
+# Used in filtering facets with the "or" operator
+def filter_term_json(facet):
+    return {
+        "term": {
+            "subject": facet
+        }
+    }
+
+
+def faceted_query(query):
+    qstring, art, adv, fam, ill = query
+
+    queries = [{"match": {"title": qstring}}, {"match": {"body": qstring}}]
+    if qstring == "":
+        queries = [{"match_all": {}}]
+    selected_facets = []
+
+    # Only search for specified facets
+    if art == "True":
+        selected_facets.append(filter_term_json("artikel"))
+    if adv == "True":
+        selected_facets.append(filter_term_json("advertentie"))
+    if fam == "True":
+        selected_facets.append(filter_term_json("familiebericht"))
+    if ill == "True":
+        selected_facets.append(filter_term_json("illustratie"))
 
     dis_max = {
         "query": {
-            "dis_max": {
-                "queries": [
-                    {"match": {"title": query}},
-                    {"match": {"body": query}}
-                ],
-                "tie_breaker": 0.3
+            "filtered": {
+                "query": {
+                    "dis_max": {
+                        "queries": queries,
+                        "tie_breaker": 0.3
+                    }
+                },
+                "filter": {
+                    "or": selected_facets
+                }
             }
         },
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-datehistogram-aggregation.html
@@ -48,20 +77,14 @@ def summarise(query, text):
         return summarisation.strip()
 
 
-def faceted_search(query, facets):
+def faceted_search(query):
     es = Elasticsearch()
 
     es.indices.refresh(index="telegraaf")
 
-    res = es.search(index="telegraaf", body=faceted_query(query, facets))
+    res = es.search(index="telegraaf", body=faceted_query(query))
     for hit in res["hits"]["hits"]:
-        hit["_source"]["text"] = summarise(query, hit["_source"]["text"])
-    # print "Total results: {}!".format(results["hits"]["total"])
-    # print "Showing top 5 results!\n"
-    # for hit in results["hits"]["hits"][:5]:
-    #     print "{} - {} - {}".format(hit["_score"], hit["_source"]["subject"], hit["_source"]["date"])
-    #     print hit["_source"]["source"]
-    #     print hit["_source"]["title"].encode("utf-8"), "\n"
+        hit["_source"]["text"] = summarise(query[0], hit["_source"]["text"])
 
     barStats = ""
     for dd in res["aggregations"]["ArticleDates"]["buckets"]:
