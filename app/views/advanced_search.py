@@ -22,12 +22,6 @@ def advanced_query(query):
     # Return all records if query strings are empty
     if qtitle == "" and qbody == "":
         queries = [{"match_all": {}}]
-    if qtitle == "" and qbody != "":
-        querytype = {
-            "term": {
-                "body": qbody
-            }
-        }
 
     # error is a string to return to the template if there are any
     # problems with the specified variable values
