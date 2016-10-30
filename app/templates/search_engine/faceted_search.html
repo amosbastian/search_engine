@@ -70,14 +70,14 @@ hgroup h2.lead { font: normal normal 1.125em "Roboto",Arial,Verdana,sans-serif; 
 <div class="container">
     <center>
     <div style="margin: 10px">
-        <a href="/search_faceted">
-            <button type="button" class="btn btn-default">
-                faceted Search
-            </button>
-        </a>
         <a href="/search_advanced">
             <button type="button" class="btn btn-default">
                 Advanced Search
+            </button>
+        </a>
+        <a href="/search_engine">
+            <button type="button" class="btn btn-default">
+                Simple Search
             </button>
         </a>
     </div>
@@ -85,7 +85,17 @@ hgroup h2.lead { font: normal normal 1.125em "Roboto",Arial,Verdana,sans-serif; 
         <input type="text" class="form-control" placeholder="Search..." name="query">
         <button type="submit" class="btn btn-default" name="my-form">
             <span class="glyphicon glyphicon-search"></span>
-        </button>
+        </button><br>
+
+        <label class="checkbox-inline">
+            <input type="checkbox" value="True" name="art" checked>Artikelen
+        </label>
+        <label class="checkbox-inline">
+            <input type="checkbox" value="True" name="adv" checked>Advertenties
+        </label>
+        <label class="checkbox-inline">
+            <input type="checkbox" value="True" name="fam" checked>Familieberichten
+        </label>
     </form>
     </center>
 </div>
