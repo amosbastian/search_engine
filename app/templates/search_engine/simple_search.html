@@ -30,9 +30,10 @@
             }
             data.addRows(dd);
 
+            var options = {bar: {groupWidth: "100%"}}
             // Instantiate and draw the chart.
             var chart = new google.visualization.ColumnChart(document.getElementById('datesHist'));
-            chart.draw(data, null);
+            chart.draw(data, options);
         }
     </script>
 
