@@ -1,1 +1,97 @@
-<a href="{{ url_for('search_engine.home') }}">Search engine</a>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SERP</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.10/clipboard.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <style type="text/css">
+    @import "http://fonts.googleapis.com/css?family=Roboto:300,400,500,700";
+    #infocont{
+        background-color: #F9F9F9;
+        padding: 50px 200px 50px 200px;
+        width: 60%;
+        border-bottom: 10px solid #F0F0F0
+    }
+    #section{
+        margin-top: 50px;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="infocont">
+        <h1> Search Engine</h1>
+        <div style="margin-bottom: 50px">
+            <a href="/search_engine">
+                <button type="button" class="btn btn-default">
+                    Simple Search
+                </button>
+            </a>
+            <a href="/search_advanced">
+                <button type="button" class="btn btn-default">
+                    Advanced Search
+                </button>
+            </a>
+            <a href="/search_faceted">
+                <button type="button" class="btn btn-default">
+                    Faceted Search
+                </button>
+            </a>
+        </div>
+        <div>
+            <h4> Amos Bastian - 10676481 </h4>
+            <h4> Carlo Locsin - 10724664 </h4>
+            <div id="section">
+                <h1> SERP</h1>
+                <p> The SERP of our search engine displays: <br>
+                    - a bar graph acting as a timeline showing the amount of articles returned per year. The bargraph is made using Google Charts. <br>
+                    - a wordcloud containing the most common words found in the <i>titles</i> of the returned articles. This wordcloud is not very reliable because of this. Trying to search in the bodies instead of the titles gave connection timeouts. The wordcloud is made using <i>wordcloud2.js</i> from <a href="https://github.com/timdream/wordcloud2.js/"> https://github.com/timdream/wordcloud2.js/ </a><br>
+                    - A list of result articles showing the the title, some of the body, the date of the article and the type of article.<br><br>
+                </p>
+                <h4> Shortcomings </h4>
+                <p>
+                    - Unfortunately, due to time constraints we weren't able to conveniently save the user input when displaying search results: all user inputs in the fields will be wiped and the input fields will be returned to their default values.<br>
+                    - As mentioned before, we were also unable to get the wordcloud properly displaying the most common terms of the search results. <br>
+                    - The displayed search results are limited as we did not want to flood the page with articles. We did not take enough time to implement a dynamic way to let the user browse through multiple pages of results <br>
+                </p>
+            </div>
+            <div id="section">
+                <h1>Simple Search</h1>
+                <p> Simple Search contains a single input bar in which the user can type in a query. This query is used to search in both the titles and bodies of the articles in the index. Using the query type dis_max, the query returns the union of the results from the titles and from the bodies.</p>
+                <a href="/search_engine">
+                    <button type="button" class="btn btn-default">
+                        Simple Search
+                    </button>
+                </a>
+            </div>
+            <div id="section">
+                <h1>Advanced Search</h1>
+                <p> Advanced Search has four input bars. The first is the input bar for the query string used to search in the titles of the articles. The second is for the query string used to search in the bodies. The third and fourth are for specifying a lower and upper bound for the time period in which the user wants to search.<br>
+                <br>
+                Unlike in simple search, advanced search uses boolean search with the search type "should". With this, the user specifies that the returned results SHOULD contain certain terms, but they don't have to. Both the query strings don't HAVE to match, but this search method values articles higher if both the terms for the title and the terms for the bodies match.<br>
+                <br>
+                Also unlike simple search, in advanced search the user is allowed to leave fields open. Leaving both input bars empty will return all articles in the specified time period. If the lower bound is left empty, the search will only return articles up until the upper bound, and vice versa for leaving the upper bound empty. Leaving everything empty will return all articles </p>
+                <a href="/search_advanced">
+                    <button type="button" class="btn btn-default">
+                        Advanced Search
+                    </button>
+                </a>
+            </div>
+            <div id="section">
+                <h1>Faceted Search</h1>
+                <p> Faceted Search has one input bar and four checkboxes, one for each of the four types of articles. Checking the boxes for the facets allows the search to return articles belonging to that facet. Articles belonging to unchecked facets are filtered out. Faceted Search uses the same searching method as Simple Search, except for the filtering part</p>
+                <a href="/search_faceted">
+                    <button type="button" class="btn btn-default">
+                        Faceted Search
+                    </button>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+</body>
