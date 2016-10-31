@@ -21,4 +21,5 @@ def home_post():
     query = (qstring, art, adv, fam, ill)
     resp = faceted_search.faceted_search(query)
     return render_template("search_engine/faceted_search.html",
-                           query=query, response=resp[0], barStats=resp[1])
+                           query=query, response=resp[0], barStats=resp[1],
+                           cloudStats=resp[2])

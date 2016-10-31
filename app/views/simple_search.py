@@ -1,4 +1,5 @@
 from elasticsearch import Elasticsearch
+from collections import Counter, defaultdict
 import json
 import nltk.data
 
@@ -16,6 +17,10 @@ def simple_query(query):
         },
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-datehistogram-aggregation.html
         "aggregations": {
+            "TermCounts": {
+                # Aggregation of field "body" doesn't work for some reason
+                "significant_terms": {"field": "title"}
+            },
             "ArticleDates": {
                 "date_histogram": {
                     "field": "date",
@@ -33,7 +38,7 @@ def summarise(query, text):
     summarisation = ""
     for sentence in tokenizer.tokenize(text):
         if any([word in sentence for word in query.split()]):
-            print sentence.encode("utf-8"), word
+            # print sentence.encode("utf-8"), word
             sentence = sentence.replace(
                 word, "<b>{}</b>".format(word).encode("utf-8"))
             summarisation += sentence + " "
@@ -44,6 +49,31 @@ def summarise(query, text):
         return " ".join(text.strip().split()[:50])
     else:
         return summarisation.strip()
+
+
+def get_bar_stats(res):
+    barStats = ""
+    for dd in res["aggregations"]["ArticleDates"]["buckets"]:
+        yr = dd['key_as_string'].split('-', 1)[0]
+        dc = dd['doc_count']
+        barStats += yr + '-' + str(dc) + '/'
+
+    return barStats
+
+
+def get_cloud_stats(res):
+    if res["aggregations"]["TermCounts"]["buckets"] == []:
+        return ""
+
+    cloudStats = ""
+    highest = res["aggregations"]["TermCounts"]["buckets"][0]["doc_count"]
+    norm = highest / 15.0
+
+    for tc in res["aggregations"]["TermCounts"]["buckets"]:
+        tc["key"]
+        tc["doc_count"]
+        cloudStats += tc["key"] + '-' + str(tc["doc_count"] / norm) + '/'
+    return cloudStats
 
 
 def simple_search(query):
@@ -61,13 +91,10 @@ def simple_search(query):
     #     print hit["_source"]["source"]
     #     print hit["_source"]["title"].encode("utf-8"), "\n"
 
-    barStats = ""
-    for dd in res["aggregations"]["ArticleDates"]["buckets"]:
-        yr = dd['key_as_string'].split('-', 1)[0]
-        dc = dd['doc_count']
-        barStats += yr + '-' + str(dc) + '/'
+    barStats = get_bar_stats(res)
+    cloudStats = get_cloud_stats(res)
 
-    return res, barStats
+    return res, barStats, cloudStats
 
 if __name__ == '__main__':
     simple_search("oorlog in duitsland")

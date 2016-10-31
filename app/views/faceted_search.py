@@ -1,4 +1,5 @@
 from elasticsearch import Elasticsearch
+from app.views.simple_search import summarise, get_bar_stats, get_cloud_stats
 import json
 import nltk.data
 
@@ -47,6 +48,10 @@ def faceted_query(query):
         },
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-datehistogram-aggregation.html
         "aggregations": {
+            "TermCounts": {
+                # Aggregation of field "body" doesn't work for some reason
+                "significant_terms": {"field": "title"}
+            },
             "ArticleDates": {
                 "date_histogram": {
                     "field": "date",
@@ -59,24 +64,6 @@ def faceted_query(query):
     return dis_max
 
 
-def summarise(query, text):
-    tokenizer = nltk.data.load("nltk:tokenizers/punkt/dutch.pickle")
-    summarisation = ""
-    for sentence in tokenizer.tokenize(text):
-        if any([word in sentence for word in query.split()]):
-            print sentence.encode("utf-8"), word
-            sentence = sentence.replace(
-                word, "<b>{}</b>".format(word).encode("utf-8"))
-            summarisation += sentence + " "
-        if len(summarisation.split()) > 50:
-            break
-
-    if (len(summarisation) < 1):
-        return " ".join(text.strip().split()[:50])
-    else:
-        return summarisation.strip()
-
-
 def faceted_search(query):
     es = Elasticsearch()
 
@@ -86,13 +73,9 @@ def faceted_search(query):
     for hit in res["hits"]["hits"]:
         hit["_source"]["text"] = summarise(query[0], hit["_source"]["text"])
 
-    barStats = ""
-    for dd in res["aggregations"]["ArticleDates"]["buckets"]:
-        yr = dd['key_as_string'].split('-', 1)[0]
-        dc = dd['doc_count']
-        barStats += yr + '-' + str(dc) + '/'
-
-    return res, barStats
+    barStats = get_bar_stats(res)
+    cloudStats = get_cloud_stats(res)
+    return res, barStats, cloudStats
 
 if __name__ == '__main__':
     simple_search("oorlog in duitsland")

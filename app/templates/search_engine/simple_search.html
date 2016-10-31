@@ -37,12 +37,15 @@
         }
     </script>
 
+    <!-- https://github.com/timdream/wordcloud2.js credit to Tim Dream -->
+    <script src="../static/js/wordcloud2.js"> </script>
+
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 <style type="text/css"> 
 @import "http://fonts.googleapis.com/css?family=Roboto:300,400,500,700";
 
-.container { margin-top: 20px; }
+.container { padding-top: 20px; }
 .mb20 { margin-bottom: 20px; } 
 
 hgroup { padding-left: 15px; border-bottom: 1px solid #ccc; }
@@ -65,10 +68,24 @@ hgroup h2.lead { font: normal normal 1.125em "Roboto",Arial,Verdana,sans-serif; 
 .search-result span.plus a:hover { background-color: #414141; }
 .search-result span.plus a i { color: #fff !important; }
 .search-result span.border { display: block; width: 97%; margin: 0 15px; border-bottom: 1px dotted #ccc; }
+
+#srchres{
+    background-color: #F9F9F9;
+    padding: 5px;
+    border-bottom: 10px solid #F0F0F0
+}
+#searchbarcont{
+    background-color: #F9F9F9;
+    padding: 5px;
+    border-bottom: 10px solid #F0F0F0
+}
 </style>
 </head>
+
 <body>
-<div class="container">
+
+
+<div class="container" id="searchbarcont">
     <center>
     <div style="margin: 10px">
         <a href="/search_faceted">
@@ -91,19 +108,23 @@ hgroup h2.lead { font: normal normal 1.125em "Roboto",Arial,Verdana,sans-serif; 
     </center>
 </div>
 {% if response is not none %}
-<div class="container">
-    <center>
-        <p class="text-muted">
+
+<div class="container", style="">
+    <center >
+        <p class="text-muted" >
             About {{ response["hits"]["total"] }} results ({{ response["took"] }} milliseconds) <br>
-            <div id="datesHist"/>
+            <div id="datesHist">
         </p>
     </center>
+    <div id="surrounding_div" style="width: 100%;height: 200px">
+        <canvas id="canvas_cloud"></canvas>
+    </div>
 </div>
 <div class="container">
     <section class="col-xs-12 col-sm-6 col-md-12">
     {% for hit in response["hits"]["hits"] %}
     {% set score = hit["_score"] %}
-        <article class="search-result row">
+        <article class="search-result row" id="srchres">
             <div class="col-xs-12 col-sm-12 col-md-3">
                 <a href="#" title="Lorem ipsum" class="thumbnail"><img src="http://lorempixel.com/250/140/people" alt="Lorem ipsum" /></a>
             </div>
@@ -123,5 +144,39 @@ hgroup h2.lead { font: normal normal 1.125em "Roboto",Arial,Verdana,sans-serif; 
     {% endfor %}
     </section>
 </div>
+
+<!-- http://stackoverflow.com/questions/25079736/responsive-width-with-wordcloud2-js-canvas-html5-element -->
+<script>
+    var div = document.getElementById("surrounding_div");
+    var canvas = document.getElementById("canvas_cloud");
+    canvas.height = div.offsetHeight;
+    canvas.width  = div.offsetWidth;
+
+    // convert string into list of lists
+    var cs_str = "{{cloudStats}}".split('/');
+    var cs = [];
+    var temp;
+    for (var i = 0; i < cs_str.length - 1; i++){
+        temp = cs_str[i].split('-');
+        temp[1] = parseInt(temp[1])
+        // If the word shows up really infrequently, set size to 3.0
+        // to at least make it visible
+        if (temp[1] < 3.0){
+            temp[1] = 3.0;
+        }
+        cs.push(temp);
+    }
+
+    var options = 
+    {
+        list : cs,
+        gridSize: Math.round(16 * document.getElementById('canvas_cloud').offsetWidth / 1024),
+        weightFactor: function (size) {
+        return Math.pow(size, 1.9) * document.getElementById('canvas_cloud').offsetWidth / 1024;
+        }
+    }
+
+    WordCloud(document.getElementById('canvas_cloud'), options); 
+</script>
 {% endif %}
 </body>

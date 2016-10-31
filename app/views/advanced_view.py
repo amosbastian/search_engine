@@ -21,4 +21,4 @@ def home_post():
     resp = advanced_search.advanced_search(query)
     return render_template("search_engine/advanced_search.html",
                            query=query, response=resp[0], barStats=resp[1],
-                           msg=resp[2])
+                           cloudStats=resp[2], msg=resp[3])
