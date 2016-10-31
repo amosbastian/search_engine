@@ -1,7 +1,16 @@
+""" Amos Bastian - 10676481
+    Carlo Locsin - 10724664
+
+"""
+
 from elasticsearch import Elasticsearch
 from collections import Counter, defaultdict
 import json
 import nltk.data
+
+
+# simple_query takes a querystring and searches through all articles. Returns
+# a union of all matches for searching in the titles and in the bodies.
 
 
 def simple_query(query):
@@ -33,6 +42,7 @@ def simple_query(query):
     return dis_max
 
 
+# summarise looks through the given text and highlights the query word.
 def summarise(query, text):
     tokenizer = nltk.data.load("nltk:tokenizers/punkt/dutch.pickle")
     summarisation = ""
@@ -51,6 +61,11 @@ def summarise(query, text):
         return summarisation.strip()
 
 
+# Returns a string of all the statistics needed to create a timeline bargraph
+# The string has the format: date-count|date2-count2|date3-count3|
+# A string is used, as a python object cannot directly be passed to javascript
+# Javascript will analyse the string and turn it into a proper list to be used
+# in creating a bar graph (see any of the template files).
 def get_bar_stats(res):
     barStats = ""
     for dd in res["aggregations"]["ArticleDates"]["buckets"]:
@@ -61,6 +76,12 @@ def get_bar_stats(res):
     return barStats
 
 
+# Returns a string of all the statistics needed to create a wordcloud. The
+# highest value of the counted terms is normalized to 15, and all other terms
+# are proportionaly normalized. This is so the wordcloud does not explode
+# trying to display a giant word. Words too small will be set to 3, so they can
+# still be seen.
+# The string has the format: word-count|word2-count2|word3-count3|
 def get_cloud_stats(res):
     if res["aggregations"]["TermCounts"]["buckets"] == []:
         return ""
@@ -84,13 +105,8 @@ def simple_search(query):
     res = es.search(index="telegraaf", body=simple_query(query))
     for hit in res["hits"]["hits"]:
         hit["_source"]["text"] = summarise(query, hit["_source"]["text"])
-    # print "Total results: {}!".format(results["hits"]["total"])
-    # print "Showing top 5 results!\n"
-    # for hit in results["hits"]["hits"][:5]:
-    #     print "{} - {} - {}".format(hit["_score"], hit["_source"]["subject"], hit["_source"]["date"])
-    #     print hit["_source"]["source"]
-    #     print hit["_source"]["title"].encode("utf-8"), "\n"
 
+    # get statistics strings to render the bargraph timeline and the wordcloud
     barStats = get_bar_stats(res)
     cloudStats = get_cloud_stats(res)
 

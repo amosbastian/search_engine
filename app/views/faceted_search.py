@@ -1,3 +1,8 @@
+""" Amos Bastian - 10676481
+    Carlo Locsin - 10724664
+
+"""
+
 from elasticsearch import Elasticsearch
 from app.views.simple_search import summarise, get_bar_stats, get_cloud_stats
 import json
@@ -14,6 +19,10 @@ def filter_term_json(facet):
     }
 
 
+# faceted_query takes a query string and 4 different values for the different
+# facets. The returned query JSON will search through the index like simple
+# search would, but will filter out any results that do not belong to the
+# specified facets using "filter" and "or"
 def faceted_query(query):
     qstring, art, adv, fam, ill = query
 

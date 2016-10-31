@@ -1,3 +1,8 @@
+""" Amos Bastian - 10676481
+    Carlo Locsin - 10724664
+
+"""
+
 from flask import Blueprint, render_template, request
 import simple_search
 

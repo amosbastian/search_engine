@@ -1,3 +1,8 @@
+""" Amos Bastian - 10676481
+    Carlo Locsin - 10724664
+
+"""
+
 from elasticsearch import Elasticsearch
 from app.views.simple_search import summarise, get_bar_stats, get_cloud_stats
 import re
@@ -5,28 +10,23 @@ import json
 import nltk.data
 
 
+# Advanced_query takes a tuple containing two different query strings and
+# two date strings. The two query strings qtitle and qbody are used to
+# search the title and body with their respective strings. The two date
+# strings are for the upper and lower bound of the time period in which the
+# user wants to search through
+
 def advanced_query(query):
     qtitle, qbody, underb, upperb = query
 
-    matchqueryt = {"match": {"title": qtitle}}
-    matchqueryb = {"match": {"text": qbody}}
-    queries = []
-
-    querytype = {
-        "dis_max": {
-            "queries": queries,
-            "tie_breaker": 0.3
-        }
-    }
+    queries = [{"match": {"title": qtitle}}, {"match": {"text": qbody}}]
 
     # Return all records if query strings are empty
     if qtitle == "" and qbody == "":
         queries = [{"match_all": {}}]
 
-    queries = [matchqueryt, matchqueryb]
-
     # error is a string to return to the template if there are any
-    # problems with the specified variable values
+    # problems with the specified bounds
     error = ""
 
     # if underbound has not been specified, make underbound minimum value.
@@ -36,7 +36,8 @@ def advanced_query(query):
     if upperb == "":
         upperb = "9999-12-31"
 
-    # Check if the dates have been set in the proper format
+    # Check if the dates have been set in the proper format, change both
+    # bounds to 1 january 0 to prevent any matches. Also display error message
     if not re.match('[\d-]+$', underb):
         underb = "0000-01-01"
         upperb = underb
@@ -68,10 +69,9 @@ def advanced_query(query):
                 }
             }
         },
-        # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-datehistogram-aggregation.html
+
         "aggregations": {
             "TermCounts": {
-                # Aggregation of field "body" doesn't work for some reason
                 "significant_terms": {"field": "title"}
             },
             "ArticleDates": {
@@ -93,9 +93,12 @@ def advanced_search(query):
 
     body, error = advanced_query(query)
     res = es.search(index="telegraaf", body=body)
+
+    # Highlight term in the body for one word queries
     for hit in res["hits"]["hits"]:
         hit["_source"]["text"] = summarise(query[1], hit["_source"]["text"])
 
+    # get statistics strings for rendering the bargraph and wordcloud
     barStats = get_bar_stats(res)
     cloudStats = get_cloud_stats(res)
 

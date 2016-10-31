@@ -1,3 +1,8 @@
+""" Amos Bastian - 10676481
+    Carlo Locsin - 10724664
+
+"""
+
 from flask import Blueprint, render_template, request
 import advanced_search
 
@@ -12,6 +17,7 @@ def home():
 
 @blueprint.route("/", methods=["POST"])
 def home_post():
+    # Retrieve form entries
     qtitle = request.form["qtitle"]
     qbody = request.form["qbody"]
     underb = request.form["underb"]
