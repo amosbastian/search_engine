@@ -9,8 +9,8 @@ def advanced_query(query):
     qtitle, qbody, underb, upperb = query
 
     matchqueryt = {"match": {"title": qtitle}}
-    matchqueryb = {"match": {"body": qbody}}
-    queries = [matchqueryt, matchqueryb]
+    matchqueryb = {"match": {"text": qbody}}
+    queries = []
 
     querytype = {
         "dis_max": {
@@ -22,6 +22,8 @@ def advanced_query(query):
     # Return all records if query strings are empty
     if qtitle == "" and qbody == "":
         queries = [{"match_all": {}}]
+
+    queries = [matchqueryt, matchqueryb]
 
     # error is a string to return to the template if there are any
     # problems with the specified variable values
@@ -47,7 +49,11 @@ def advanced_query(query):
     dis_max = {
         "query": {
             "filtered": {
-                "query": querytype,
+                "query": {
+                    "bool": {
+                        "should": queries
+                    }
+                },
                 "filter": {
                     "bool": {
                         "must": {
