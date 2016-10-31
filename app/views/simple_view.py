@@ -13,4 +13,6 @@ def home():
 def home_post():
     query = request.form["query"]
     resp = simple_search.simple_search(query)
-    return render_template("search_engine/simple_search.html", query=query, response=resp[0], barStats=resp[1])
+    return render_template("search_engine/simple_search.html", query=query,
+                           response=resp[0], barStats=resp[1],
+                           cloudStats=resp[2])
